@@ -12,6 +12,7 @@ namespace SolveSudoku
     {
         private List<int[,]> answers = new List<int[,]>();
         private int[,] x;
+        private List<int>[,] squares = new List<int>[3, 3];
         List<int>[] row = new List<int>[9];
         List<int>[] col = new List<int>[9];
 
@@ -21,7 +22,14 @@ namespace SolveSudoku
             for(int i = 0; i < 9; i++)
             {
                 points[i] = i + 1;
+                squares[i / 3, i % 3] = new List<int>();
             }
+
+            for (int j = 0; j < 9; j++)
+            {
+                squares[j / 3, j % 3].AddRange(points);
+            }
+
 
             for(int i = 0; i< 9; i++)
             {
@@ -39,6 +47,8 @@ namespace SolveSudoku
                                 temp[l] = 0;
                             }
                         }
+
+                        squares[i / 3, j / 3].Remove(x[i, j]);
                     }
                 }
                 
@@ -84,7 +94,7 @@ namespace SolveSudoku
         {
             x = problem;
             InitializeData();
-            SolveInternal(row, col, problem);
+            SolveInternal(row, col, squares, problem);
 
             if(answers.Count > 0)
             {
@@ -116,7 +126,36 @@ namespace SolveSudoku
             return new ReadOnlyCollection<int[,]>(answers);
         }
 
-        private int[,] SolveInternal(List<int>[] r, List<int>[] c, int[,] problem)
+        List<int>[] CloneArrays(List<int>[] arr)
+        {
+            var r = new List<int>[arr.Length];
+
+            for (int l = 0; l < 9; l++)
+            {
+                r[l] = new List<int>();
+                r[l].AddRange(arr[l]);
+            }
+
+            return r;
+        }
+
+        List<int>[,] CloneSquares(List<int>[,] sqs)
+        {
+            var r = new List<int>[3, 3];
+
+            for(int i = 0; i < 3; i++)
+            {
+                for(int j = 0; j < 3; j++)
+                {
+                    r[i, j] = new List<int>();
+                    r[i, j].AddRange(sqs[i, j]);
+                }
+            }
+
+            return r;
+        }
+
+        private int[,] SolveInternal(List<int>[] r, List<int>[] c, List<int>[,] sqs, int[,] problem)
         {
             for(int i = 0; i < 9; i++)
             {
@@ -124,34 +163,23 @@ namespace SolveSudoku
                 {
                     if(problem[i, j] == 0)
                     {
-                        var choices = r[i].Intersect(c[j]).ToList();
+                        var choices = r[i].Intersect(c[j]).Intersect(sqs[i / 3, j / 3]).ToList();
 
                         if(choices.Any())
                         {
-                            var nr = new List<int>[9];
-                            var nc = new List<int>[9];
-
-                            for (int l = 0; l < 9; l++)
-                            {
-                                nr[l] = new List<int>();
-                                nr[l].AddRange(r[l]);
-                            }
-
-                            for (int l = 0; l < 9; l++)
-                            {
-                                nc[l] = new List<int>();
-                                nc[l].AddRange(c[l]);
-                            }
-
+                            var nr = CloneArrays(r);
+                            var nc = CloneArrays(c);
+                            var nsqs = CloneSquares(sqs);
                             var p = problem.Clone() as int[,];
 
                             foreach(int k in choices)
                             {
                                 nr[i].Remove(k);
                                 nc[j].Remove(k);
+                                nsqs[i / 3, j / 3].Remove(k);
                                 p[i, j] = k;
 
-                                var sub = SolveInternal(nr, nc, p);
+                                var sub = SolveInternal(nr, nc, nsqs, p);
 
                                 if(sub != null)
                                 {
@@ -160,6 +188,7 @@ namespace SolveSudoku
 
                                 nr[i].Add(k);
                                 nc[j].Add(k);
+                                nsqs[i / 3, j / 3].Add(k);
                             }
 
                             return null;
