@@ -10,11 +10,11 @@ namespace SolveSudoku
 {
     public class SudokuSolver
     {
-        private List<int[,]> answers = new List<int[,]>();
+        readonly private List<int[,]> answers = new List<int[,]>();
         private int[,] x;
-        private List<int>[,] squares = new List<int>[3, 3];
-        List<int>[] row = new List<int>[9];
-        List<int>[] col = new List<int>[9];
+        private readonly List<int>[,] squares = new List<int>[3, 3];
+        readonly List<int>[] row = new List<int>[9];
+        readonly List<int>[] col = new List<int>[9];
 
         private void InitializeData()
         {
@@ -114,7 +114,28 @@ namespace SolveSudoku
 
                 for(int j = 0; j < 9; j++)
                 {
-                    writer.Write("{0}\t", problem[i, j]);
+                    if (problem[i, j] == 0)
+                        writer.Write(" \t");
+                    else
+                        writer.Write("{0}\t", problem[i, j]);
+                }
+            }
+
+            writer.WriteLine();
+        }
+
+        public void PrintSolutionV2(int[,] result, int[,] problem, TextWriter writer)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                writer.WriteLine("\n");
+
+                for (int j = 0; j < 9; j++)
+                {
+                    if (problem[i, j] == 0)
+                        writer.Write("\"{0}\"\t", result[i, j]);
+                    else
+                        writer.Write("{0}\t", result[i, j]);
                 }
             }
 
