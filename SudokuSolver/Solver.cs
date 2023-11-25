@@ -11,9 +11,15 @@ namespace SudokuSolver
     public class Solver
     {
         readonly private List<int[,]> answers = new List<int[,]>();
-        private int[,]? x;
+        private int[,]? inputData;
+
+        // Numbers don't exist in this sub square
         private readonly List<int>[,] squares = new List<int>[3, 3];
+
+        // Numbers don't exist in this row
         readonly List<int>[] row = new List<int>[9];
+
+        // Numbers don't exist in this col
         readonly List<int>[] col = new List<int>[9];
 
         private void InitializeData()
@@ -38,17 +44,17 @@ namespace SudokuSolver
 
                 for (int j = 0; j < 9; j++)
                 {
-                    if (x[i, j] != 0)
+                    if (inputData[i, j] != 0)
                     {
                         for (int l = 0; l < 9; l++)
                         {
-                            if (temp[l] == x[i, j])
+                            if (temp[l] == inputData[i, j])
                             {
                                 temp[l] = 0;
                             }
                         }
 
-                        squares[i / 3, j / 3].Remove(x[i, j]);
+                        squares[i / 3, j / 3].Remove(inputData[i, j]);
                     }
                 }
 
@@ -68,11 +74,11 @@ namespace SudokuSolver
 
                 for (int j = 0; j < 9; j++)
                 {
-                    if (x[j, i] != 0)
+                    if (inputData[j, i] != 0)
                     {
                         for (int l = 0; l < 9; l++)
                         {
-                            if (temp[l] == x[j, i])
+                            if (temp[l] == inputData[j, i])
                             {
                                 temp[l] = 0;
                             }
@@ -92,7 +98,7 @@ namespace SudokuSolver
 
         public int[,] Solve(int[,] problem)
         {
-            x = problem;
+            inputData = problem;
             InitializeData();
             SolveInternal(row, col, squares, problem);
 
@@ -188,6 +194,8 @@ namespace SudokuSolver
 
                         if (choices.Any())
                         {
+
+                            // Create a new sub problem and maintain the state
                             var nr = CloneArrays(r);
                             var nc = CloneArrays(c);
                             var nsqs = CloneSquares(sqs);
@@ -195,11 +203,15 @@ namespace SudokuSolver
 
                             foreach (int k in choices)
                             {
+                                // Made a choice to use k on problem[i, j]
+
+                                // Update the state of row, col, sqrs and problem
                                 nr[i].Remove(k);
                                 nc[j].Remove(k);
                                 nsqs[i / 3, j / 3].Remove(k);
                                 p[i, j] = k;
 
+                                // Solve this new problem
                                 var sub = SolveInternal(nr, nc, nsqs, p);
 
                                 if (sub != null)
@@ -207,9 +219,12 @@ namespace SudokuSolver
                                     answers.Add(sub);
                                 }
 
+                                // Store the status
                                 nr[i].Add(k);
                                 nc[j].Add(k);
                                 nsqs[i / 3, j / 3].Add(k);
+
+                                // Make another choice
                             }
 
                             return null;
