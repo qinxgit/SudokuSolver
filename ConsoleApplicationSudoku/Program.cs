@@ -46,7 +46,7 @@ namespace ConsoleApplicationSudoku
                 }
             }
 
-            var solver = new SolveSudoku.SudokuSolver();
+            var solver = new SudokuSolver.Solver();
 
             Console.WriteLine("\nYour sudoku problem is entered like this:");
             solver.PrintSolution(problem, Console.Out);
