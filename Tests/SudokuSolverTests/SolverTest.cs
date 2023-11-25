@@ -154,6 +154,27 @@ namespace SudokuSolverTests
             Assert.Null(result);  // Assuming that Solve returns null for unsolvable puzzles
         }
 
+        [Fact]
+        public void TestEmptySudoku()
+        {
+            // Arrange
+            int[,] emptySudoku = new int[9, 9];  // An empty Sudoku puzzle
+
+            var solver = new SudokuSolver.Solver();
+
+            // Act
+            var result = solver.Solve(emptySudoku);
+
+            // Assert
+            Assert.NotNull(result);  // Assuming that Solve returns a solution for solvable puzzles
+                                     // Add more assertions here to check the validity of the solution if necessary
+
+            foreach (int[,] r in solver.GetAllAnswers())
+            {
+                VerifySolution(r);
+            }
+        }
+
         private static void IsList1To9(List<int> y)
         {
             Assert.Equal(9, y.Count);

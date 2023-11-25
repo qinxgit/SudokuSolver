@@ -10,6 +10,7 @@ namespace SudokuSolver
 {
     public class Solver
     {
+        private const int MAX_SOLUTION_NUMBER = 3;
         readonly private List<int[,]> answers = new List<int[,]>();
         private int[,]? inputData;
 
@@ -184,6 +185,9 @@ namespace SudokuSolver
 
         private int[,] SolveInternal(List<int>[] r, List<int>[] c, List<int>[,] sqs, int[,] problem)
         {
+            if (answers.Count >= MAX_SOLUTION_NUMBER)
+                return null;
+
             for (int i = 0; i < 9; i++)
             {
                 for (int j = 0; j < 9; j++)
@@ -213,10 +217,14 @@ namespace SudokuSolver
 
                                 // Solve this new problem
                                 var sub = SolveInternal(nr, nc, nsqs, p);
+                                if (answers.Count >= MAX_SOLUTION_NUMBER)
+                                    return null;
 
                                 if (sub != null)
                                 {
                                     answers.Add(sub);
+                                    if (answers.Count >= MAX_SOLUTION_NUMBER)
+                                        return null;
                                 }
 
                                 // Store the status
